@@ -1,0 +1,50 @@
+Hi Lauren
+
+Great to hear that you want to work on Orka. Apologies for the state of the code. 
+A lot of this was written designed for a specific machine in the labs. I will 
+take some time this weekend (most likely 5th June) and tidy this.
+
+Orka was intially deployed as a web app, but I am in the process of
+dismantaling this. This is the reason the graphs menthioned in the paper do not
+work. If you decide you want this source code, let either me or Anandha know
+and I can set up another repository.
+
+In order to run this, you need to download the Android linux SDK into the
+dependencies folder (I believe I used android-22). You should not need any
+extra libaries for running command line orka in it's current state.
+
+
+To run the application:
+run main.py <app_location> <monkey_script_location>
+
+You also need to have created an Android emulator called n7.  
+
+Orka dumps it's log file to stdout. This was fine when it was a web app but
+does make the output a little tough to read now. Near the bottom of this you
+will see an output like this: 
+
+MAIN: methods is 1
+MAIN: hardware is 4
+[[{'routineName': 'showToast', 'calls': 1, 'Apis':
+{'android.widget.Toast.show': 0.0005739758, 'android.widget.Toast.makeText':
+0.007864691}}], {'Screen': 0.00109, 'total battery usage': 0.0233, 'Cell
+standby': 0.000494, 'Process usage': 0.0218}]
+Running process rm -rf /data/bjw114/working/*
+Relative uses of energy on the NEXUS 7
+the energy used by this programme could have instead run
+the below activity for the shown time (in seconds)
+Web browsing: 0.754900
+HD Video: 0.838800
+3D gaming: 0.335500
+
+Orka used to pass as serialised version of the results to the web app, but the
+newer system just dumps this into stdout. 
+
+
+Apologies as there are numerous things that I am likely forgetting. Please feel
+free to email me (ben.westfield@gmail.com) if you have questions/issues. If you
+do email, please make sure you cc Anandha 
+
+Thanks 
+
+Ben
