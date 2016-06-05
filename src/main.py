@@ -34,7 +34,8 @@ def packageName(app):
         raise AttributeError('invalid parameter type')
     if not os.path.isfile(app):
         print "bad file path  - {}".format (app)
-        raise OSError('cannot find specified app - {}'.format (app))
+        error = "cannot find specified app - {}".format(app)
+        raise OSError(error)
     #NB bwestfield: This could pass -o to grep to only get the match, but I
     #haven't been able to write a regex that matches only the package name
     command = "../dependencies/android-sdk-linux/build-tools/22.0.1/aapt \
@@ -59,8 +60,9 @@ def runProcess(cmd):
 
     if p.returncode != 0:
         print "process wont run!!"
-        raise RuntimeError('invalid command attempted to be executed in\
-            runProcess - {}'.format(cmd))
+        error = "invalid command attempted to be executed in\
+            runProcess - {}".format(cmd)
+        raise RuntimeError(error)
 
 #calls the smali/injector functions
 def injector(APP,packDir):
