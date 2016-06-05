@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 #------------------------------
-#--	Injector v0.2       --
+#--	Injector --
 #------------------------------
 #- first verion of the injector
 #- 
@@ -9,7 +9,7 @@
 #------------------------------
 
 import pygal
-import sys
+import sys, getopt
 import os 
 import subprocess 
 import csv 
@@ -28,25 +28,25 @@ EMU = "n7"
 def packageName(app):
     if not isinstance(app,str):
         #NB bwestfield, if this is ever changed back to a web app, this needs
-        #to look for unicode
-        print app
-        print type(app)
-        print "bad app name!"
+        #to check the type is unicode
+        print "supplied app name is of type {}, expected a \
+            string".format(type(app))
         raise AttributeError('invalid parameter type')
     if not os.path.isfile(app):
-        print app
-        print "bad file path"
-        raise OSError('cannot find specified app')
-    command = "../dependencies/android-sdk-linux/build-tools/22.0.1/aapt"
-    command +=" dump badging " 
-    command += app + " | grep package:\ name "
+        print "bad file path  - {}".format (app)
+        raise OSError('cannot find specified app - {}'.format (app))
+    #NB bwestfield: This could pass -o to grep to only get the match, but I
+    #haven't been able to write a regex that matches only the package name
+    command = "../dependencies/android-sdk-linux/build-tools/22.0.1/aapt \
+         dump badging {} | grep package:\ name ".format(app)
     word = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    package =  str(word.communicate()[0])
-    package2 =  package.split(' ')
-    for x in range(0,len(package2)):
-        print package2[x]
-        if package2[x].startswith("name"):
-            name = package2[x].split('\'')
+    #NB bwestfield: this is the work around for not being able to extract package name 
+    # using grep
+    package =  str(word.communicate()[0]).split(' ')
+    for x in range(0,len(package)):
+        if package[x].startswith("name"):
+            name = package[x].split('\'')
+            print "Found package name {}".format(name[1])
             return name[1]
 
 #function to run a single process in a shell for its entirety
@@ -57,11 +57,10 @@ def runProcess(cmd):
     p =subprocess.Popen(cmd,shell=True)
     p.wait()
 
-    #check if process ran
     if p.returncode != 0:
         print "process wont run!!"
         raise RuntimeError('invalid command attempted to be executed in\
-            runProcess')
+            runProcess - {}'.format(cmd))
 
 #calls the smali/injector functions
 def injector(APP,packDir):
@@ -81,7 +80,6 @@ def injector(APP,packDir):
 def loadAPIcosts():
     with open('../dependencies/api costs.csv','r') as f:
         reader = csv.reader(f)
-        #costs = #list(reader)
         costs=dict()
         for rows in reader:
             api = rows[0].split("(")
@@ -106,7 +104,7 @@ def analyseAPI():
     time.sleep(2)
     runProcess("../dependencies/android-sdk-linux/platform-tools/adb "
     + "logcat bwestfield:I *:S > ../working/output.txt &")
-    #one second delay to make sure the output has saved
+    #two second delay to make sure the output has saved
     time.sleep(2)
     #dictionary of methods. Each method stores a counter, this stores the
     #number of instance of each api call
@@ -133,6 +131,8 @@ def analyseAPI():
                         meth[method].addApi(api)
     log.close()
 
+    #CR-soon bwestfield for bwestfield: This process could be moved
+    #into the above loop
     costs = loadAPIcosts()
     #add the API costs to the number of calls
     for routines in meth.values(): 
@@ -147,6 +147,7 @@ def analyseAPI():
         for x in range(len(deleteList)):
             routines.removeApi(deleteList[x])
 
+    #CR-soon bwestfield: data no longer needs to be serialized
     #serialise the data so it can be sent as json
     serial_meth=[]
     for value in meth.values():
@@ -256,19 +257,41 @@ def generateGraph (results):
      #costChart = apiChart.render(is_unicode=True)
      #hwChart = hwChart.render(is_unicode=True)
 
+def fail_error (text): 
+    print text
+    sys.exit(2)
 
+def get_app_and_script (argv):
+    app =''
+    monkey_script =''
+    help_text ="usage: orka.py -app <app_name> -script <monkey_script>"
+    try:
+        opts,args = getopt.getopt(argv,"ha:s:",["app=","script="])
+    except getopt.GetoptError:
+        fail_error(help_text)
+
+    for opt,arg in opts:
+        if opt == "-h" or len(argv) == 0:
+            print help_text
+            sys.exit()
+        elif opt in ("-a","--app"):
+            app = arg
+        elif opt in ("-s","--script"):
+            monkey_script = arg
+    if app == '' or monkey_script == '':
+        fail_error(help_text)
+    return app,monkey_script
 
 #main applicaiton. Takes the app name and the monkey script
-def main(app,monkeyScript):
+def main(argv):
+    app,monkey_script = get_app_and_script(argv)
     print "Running Orka"
-
-    results =[]
     print "Loading emulator " +  EMU
-
     print "\n\n\----------"
     print "\n\nBeginning code injecttion"
     print "Loading apk file"
-
+    
+    results =[]
     pName = packageName(app)
     packName =  pName.split('.')
 
@@ -282,7 +305,7 @@ def main(app,monkeyScript):
     
     e = threading.Event()
     t1 = threading.Thread(name = "loadE", target=loadEmulator,
-                            args=(e,pName,monkeyScript))
+                            args=(e,pName,monkey_script))
     t1.start()
 
     analyseData(e,results)
@@ -290,14 +313,14 @@ def main(app,monkeyScript):
     print "MAIN: hardware is " + str(len(results[1]))
     #delete the App and script
     print results
+    #CR bwestfield: reapply cleaning of ./working/
 #    runProcess("rm -f " + app)
  #   runProcess("rm -f " + monkeyScript)
-    runProcess("rm -rf /data/bjw114/working/*")
     getRelativeUses(results[1])
     generateGraph(results)
     return results
 
 if __name__ == "__main__":
 #change the main to instead search for command line arguments
-    main(sys.argv[1],sys.argv[2])
+    main(sys.argv[1:])
 
