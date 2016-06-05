@@ -36,6 +36,9 @@ def packageName(app):
         print "bad file path  - {}".format (app)
         error = "cannot find specified app - {}".format(app)
         raise OSError(error)
+    if not os.path.exists("../dependencies/android-sdk-linux/build-tools/22.0.1/aapt"):
+        raise OSError("missing dependecies. Android 22.0.1 required in \
+            ../dependencies/android-sdk-linux/")
     #NB bwestfield: This could pass -o to grep to only get the match, but I
     #haven't been able to write a regex that matches only the package name
     command = "../dependencies/android-sdk-linux/build-tools/22.0.1/aapt \
