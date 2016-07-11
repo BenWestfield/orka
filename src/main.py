@@ -8,7 +8,7 @@
 
 #------------------------------
 
-import pygal
+#import pygal
 import sys, getopt
 import os 
 import subprocess 
@@ -214,7 +214,7 @@ def getRelativeUses(hardwareUse):
     print "3D gaming: %f" % round(drainPercent * 14400,4)
 
 
-
+"""
 def generateGraph (results):
      routines = results[0]
      apiChart = pygal.Pie(width=600, height =500)
@@ -261,6 +261,10 @@ def generateGraph (results):
      #make charts
      #costChart = apiChart.render(is_unicode=True)
      #hwChart = hwChart.render(is_unicode=True)
+"""
+
+def generateGraph(results):
+    print "worked"
 
 def fail_error (text): 
     print text
