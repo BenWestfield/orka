@@ -22,7 +22,7 @@ import re
 
 ADB = "../dependencies/android-sdk-linux/platofrm-tools/adb"
 EMULATOR = "../dependencies/android-sdk-linux/tools/emulator"
-EMU = "n7"
+EMU = sys.argv[6]
 
 #function to get the package name from the app
 def packageName(app):
@@ -160,12 +160,12 @@ def analyseAPI():
     return serial_meth
 
 #function to load the emulator and install the app
-def loadEmulator(e,pName,monkey):
+def loadEmulator(e,pName,monkey,emul):
     print "loading emulator" 
     #set the event flag so that later part know the emulator is loaded
     cmd = "../scripts/loadEmulator.sh ../working/dist/orka.apk "
     print "starting the emulator"
-    cmd += pName + " " + monkey
+    cmd += pName + " " + monkey + " " + EMU
     runProcess(cmd)
     print "emulator finished"
 
@@ -273,9 +273,10 @@ def fail_error (text):
 def get_app_and_script (argv):
     app =''
     monkey_script =''
-    help_text ="usage: orka.py -app <app_name> -script <monkey_script>"
+    emul =''
+    help_text ="usage: orka.py -app <app_name> -script <monkey_script> -e <emulator>"
     try:
-        opts,args = getopt.getopt(argv,"ha:s:",["app=","script="])
+        opts,args = getopt.getopt(argv,"ha:s:e:",["app=","script=","em="])
     except getopt.GetoptError:
         fail_error(help_text)
 
@@ -287,17 +288,19 @@ def get_app_and_script (argv):
             app = arg
         elif opt in ("-s","--script"):
             monkey_script = arg
+        elif opt in ("-e","--emul"):
+	    emul = arg
     if app == '' or monkey_script == '':
         fail_error(help_text)
-    return app,monkey_script
+    return app,monkey_script,emul
 
 #main applicaiton. Takes the app name and the monkey script
 def main(argv):
-    app,monkey_script = get_app_and_script(argv)
+    app,monkey_script,emul = get_app_and_script(argv)
     print "Running Orka"
     print "Loading emulator " +  EMU
     print "\n\n\----------"
-    print "\n\nBeginning code injecttion"
+    print "\n\nBeginning code injection"
     print "Loading apk file"
     
     results =[]
@@ -314,7 +317,7 @@ def main(argv):
     
     e = threading.Event()
     t1 = threading.Thread(name = "loadE", target=loadEmulator,
-                            args=(e,pName,monkey_script))
+                            args=(e,pName,monkey_script,emul))
     t1.start()
 
     analyseData(e,results)

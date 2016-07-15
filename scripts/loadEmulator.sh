@@ -12,10 +12,11 @@
 APP=$1
 PACKAGE=$2
 MONKEY=${3}
+AVD=$4
 ADB=../dependencies/android-sdk-linux/platform-tools/adb
 
 #load the emulator
-../dependencies/android-sdk-linux/tools/emulator -avd n7  -wipe-data &\
+../dependencies/android-sdk-linux/tools/emulator -avd $AVD -wipe-data &\
 #-qemu -m 512 -enable-kvm &
 #adding a slight delay to allow the emulator to start 
 sleep 1

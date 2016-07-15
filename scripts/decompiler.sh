@@ -28,7 +28,7 @@ fi
 echo "decompiling apk file"
 echo
 #decompile with ApkTool, the -f will clear the working directory
-java -jar ../dependencies/apktool_2.0.1.jar d $FILENAME -o ../working/ -f 
+java -jar ../dependencies/apktool_2.0.1.jar d $FILENAME -o ../working/ --force
 
 echo "finished decompiling app"
 
