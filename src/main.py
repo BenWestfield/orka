@@ -165,7 +165,7 @@ def loadEmulator(e,pName,monkey,emul):
     #set the event flag so that later part know the emulator is loaded
     cmd = "../scripts/loadEmulator.sh ../working/dist/orka.apk "
     print "starting the emulator"
-    cmd += pName + " " + monkey + " " + EMU
+    cmd += pName + " " + monkey + " " + emul
     runProcess(cmd)
     print "emulator finished"
 
@@ -305,8 +305,8 @@ def main(argv):
     
     results =[]
     pName = packageName(app)
-    packName =  pName.split('.')
-
+#    packName =  pName.split('.')
+    packName = "1"
     packDir = ''
     for x in range(0,len(packName)):
         packDir += packName[x] + '/'
@@ -316,18 +316,26 @@ def main(argv):
     injector(app,packDir)
     
     e = threading.Event()
+    e2 = threading.Event()
+
     t1 = threading.Thread(name = "loadE", target=loadEmulator,
                             args=(e,pName,monkey_script,emul))
+    t2 = threading.Thread(name = "loadE2", target=loadEmulator, args=(e2,pName,monkey_script,emul))
+
     t1.start()
 
     analyseData(e,results)
+
+    t2.start()
+
     print "MAIN: methods is " + str(len(results[0]))
     print "MAIN: hardware is " + str(len(results[1]))
     #delete the App and script
     print results
     #CR bwestfield: reapply cleaning of ./working/
-#    runProcess("rm -f " + app)
- #   runProcess("rm -f " + monkeyScript)
+    #runProcess("rm -f " + app)
+    #runProcess("rm -f " + monkey_script)
+
     getRelativeUses(results[1])
     generateGraph(results)
     return results
@@ -335,4 +343,3 @@ def main(argv):
 if __name__ == "__main__":
 #change the main to instead search for command line arguments
     main(sys.argv[1:])
-
