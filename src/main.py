@@ -276,7 +276,7 @@ def get_app_and_script (argv):
     emul =''
     help_text ="usage: orka.py -app <app_name> -script <monkey_script> -e <emulator>"
     try:
-        opts,args = getopt.getopt(argv,"ha:s:e:",["app=","script=","em="])
+        opts,args = getopt.getopt(argv,"ha:s:m:",["app=","script=","em="])
     except getopt.GetoptError:
         fail_error(help_text)
 
@@ -288,7 +288,7 @@ def get_app_and_script (argv):
             app = arg
         elif opt in ("-s","--script"):
             monkey_script = arg
-        elif opt in ("-e","--emul"):
+        elif opt in ("-m","--emul"):
 	    emul = arg
     if app == '' or monkey_script == '':
         fail_error(help_text)
@@ -305,6 +305,7 @@ def main(argv):
     
     results =[]
     pName = packageName(app)
+
 #    packName =  pName.split('.')
     packName = "1"
     packDir = ''
@@ -316,28 +317,32 @@ def main(argv):
     injector(app,packDir)
     
     e = threading.Event()
-    e2 = threading.Event()
 
     t1 = threading.Thread(name = "loadE", target=loadEmulator,
                             args=(e,pName,monkey_script,emul))
-    t2 = threading.Thread(name = "loadE2", target=loadEmulator, args=(e2,pName,monkey_script,emul))
 
     t1.start()
 
     analyseData(e,results)
 
-    t2.start()
+    print results
 
     print "MAIN: methods is " + str(len(results[0]))
     print "MAIN: hardware is " + str(len(results[1]))
+
     #delete the App and script
-    print results
+    #print results
     #CR bwestfield: reapply cleaning of ./working/
     #runProcess("rm -f " + app)
     #runProcess("rm -f " + monkey_script)
 
     getRelativeUses(results[1])
+
     generateGraph(results)
+
+    with open('res.txt', 'wb') as fh:
+        fh.write(str(results) + "\n")
+
     return results
 
 if __name__ == "__main__":
