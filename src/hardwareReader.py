@@ -9,7 +9,7 @@
 
 
 
-FILE = "../working/dump.txt"
+FILE = "orka/orka/working/dump.txt"
 
 def getHWusage():
     
