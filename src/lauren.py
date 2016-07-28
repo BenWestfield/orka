@@ -127,10 +127,10 @@ def main(argv):
 	lines = f.readline()
 	lines = lines.split(' ')
 
-	j = 2
+	j = 5
 	for i in lines:
-		runProcess("xterm -hold -e ssh matrix0" + str(j) + " -X \'~/orka/orka/src/lauren2.py " + app + " " + monkey_script + " " + i + "\' &")
-		j += 1
+		runProcess("xterm -hold -e ssh matrix0" + str(j) + " -X \'~/orka/orka/src/lauren2.py " + app + " " + monkey_script + " " + str(j) + " " + i + "\' &")
+		j += 3
 
 #	runProcess('./lauren2.py ' + pName + ' ' + monkey_script + ' n7')
 

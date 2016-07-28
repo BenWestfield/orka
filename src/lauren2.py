@@ -9,6 +9,7 @@ import csv
 import os
 import hardwareReader
 import re
+import datetime
 
 #function to run a single process in a shell for its entirety
 def runProcess(cmd):
@@ -161,7 +162,10 @@ def main(argv):
 
 	pName = argv[0]
 	monkey_script = argv[1]
-	emul = argv[2]
+	emul = argv[3]
+	machine = argv[2]
+
+	print machine
 
 	e = threading.Event()
 	t1 = threading.Thread(name = "loadE", target=loadEmulator,
@@ -170,6 +174,11 @@ def main(argv):
 	t1.start()
 
 	analyseData(e, results)
+
+        f = open('orka-matrix0' + machine + '-' + datetime.datetime, 'w')
+        f.write(results)
+        f.close()
+
 
 	return
 
