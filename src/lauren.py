@@ -124,7 +124,9 @@ def loadEmulator(e,pName,monkey,emul,port):
     e.set()
 
 #bwestfield
-def analyseData(e,results):
+def analyseData(e,port):
+
+	results = []	
 
         print "entering analyse data"
 
@@ -139,7 +141,7 @@ def analyseData(e,results):
         print "Total API energy usage"
 
         #dump battery stats into dump.txt
-        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb shell "
+        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb -s emulator-" + port + " shell "
                 + "dumpsys batterystats > " + ORKAHOME + "working/dump.txt")
 
         while not os.path.exists(ORKAHOME + "working/dump.txt"):
@@ -147,8 +149,10 @@ def analyseData(e,results):
 
         results.append(hardwareReader.getHWusage())
 
+	print results
+
         #last thing to do is close the emulator
-        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb emu kill")
+        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb -s emulator-" + port + " emu kill")
 
 #bwestfield
 #function that returns a dictionary containing the api costs
@@ -183,7 +187,7 @@ def analyseAPI():
         #download logcat and save to file
         time.sleep(2)
 
-        runProcess(ORKAHOME + "dependencies/android-sdk-linux/platform-tools/adb "
+        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb "
                 + "logcat bwestfield:I *:S > " + ORKAHOME + "working/output.txt &")
 
         #two second delay to make sure the output has saved
@@ -240,14 +244,13 @@ def analyseAPI():
         return serial_meth
 
 
+
 def main(argv):
 
 	app, monkey_script, emul = get_app_script_emul(argv)
 
 	print "Running Orka"
 
-	results1 = []
-	results2 = []
 
 	#get package name and directory
 	pName = packageName(app)    
@@ -274,11 +277,15 @@ def main(argv):
 			args=(e2,pName,monkey_script,"none","5556"))
 	t2.start()
 
-        analyseData(e1, results)
-	analyseData(e2, results)
+	t3 = threading.Thread(name = "res1", target=analyseData,
+			args=(e1, "5554"))
+	t3.start()
 
-	print results1
-	print results2
+	t4 = threading.Thread(name = "res2", target=analyseData,
+			args=(e2, "5556"))
+
+	t4.start()
+
 
 #	f = open(emul, 'r')
 
