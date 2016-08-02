@@ -13,17 +13,18 @@ APP=$1
 PACKAGE=$2
 MONKEY=${3}
 AVD=$4
+PORT=$5
 ADB=$ORKAHOME/dependencies/android-sdk/platform-tools/adb
 
 #load the emulator
-$ORKAHOME/dependencies/android-sdk/tools/emulator -avd $AVD -wipe-data &\
+$ORKAHOME/dependencies/android-sdk/tools/emulator -port $PORT -avd $AVD -wipe-data &\
 #-qemu -m 512 -enable-kvm &
 #adding a slight delay to allow the emulator to start 
 sleep 1
 #wait for the emulator to load
-$ADB wait-for-device
+$ADB -s emulator-$PORT wait-for-device
 while true;do
-     LOADED=$($ADB shell getprop sys.boot_completed | tr -d '\r')
+     LOADED=$($ADB -s emulator-$PORT shell getprop sys.boot_completed | tr -d '\r')
 #     'echo $LOADED
      if [ "$LOADED" = "1" ];
         then
@@ -33,17 +34,19 @@ while true;do
 done
 
 #unlock screen
-$ADB shell input keyevent 82
+$ADB -s emulator-$PORT shell input keyevent 82
 #load the app
 while [ ! -f $ORKAHOME/working/dist/orka.apk ];
 do
     sleep 1
 done
-$ADB install $ORKAHOME/working/dist/orka.apk
+$ADB -s emulator-$PORT install $ORKAHOME/working/dist/orka.apk
+
+echo "here"
 
 #add slight wait before running telnet
 sleep 4
-$ORKAHOME/scripts/telnet.sh
+$ORKAHOME/scripts/telnet.sh $PORT
 
       
 #run monkey script

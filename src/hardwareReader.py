@@ -50,6 +50,8 @@ def getHWusage():
                         #add last line
                         name += line[i][:-1]
                         #the next i will contain the energy costs
+			if i == (len(line) - 1):
+			    break
                         costDict[name] = line[i+1]
                 if line[0] == "Estimated":
                     write = True

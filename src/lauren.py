@@ -111,12 +111,12 @@ def runProcess(cmd):
 		raise RuntimeError(error)
 
 #function to load the emulator and install the app
-def loadEmulator(e,pName,monkey,emul):
+def loadEmulator(e,pName,monkey,emul,port):
     print "loading emulator"
     #set the event flag so that later part know the emulator is loaded
     cmd = ORKAHOME + "scripts/loadEmulator.sh " + ORKAHOME + "working/dist/orka.apk "
     print "starting the emulator"
-    cmd += pName + " " + monkey + " " + emul
+    cmd += pName + " " + monkey + " " + emul + " " + port
     runProcess(cmd)
     print "emulator finished"
 
@@ -173,6 +173,8 @@ def sanitise(api):
 #function that draws the APIs from logcat then compares to the list
 #of API costs. Returns a dictionary of Routine object
 def analyseAPI():
+	print "enter API"
+
         METHOD_NAME = 3
         #index of the string that will be used when decideding on how to log
         LINE_DIRECT = 2
@@ -244,7 +246,8 @@ def main(argv):
 
 	print "Running Orka"
 
-	results = []
+	results1 = []
+	results2 = []
 
 	#get package name and directory
 	pName = packageName(app)    
@@ -257,16 +260,25 @@ def main(argv):
 	#inject logging into app
 	injector(app, packDir)
 
-	e = threading.Event()
+	e1 = threading.Event()
 
 	t1 = threading.Thread(name = "loadE", target=loadEmulator,
-			args=(e,pName,monkey_script,"n7"))
+			args=(e1,pName,monkey_script,"n7","5554"))
 
 	t1.start()
 
-        analyseData(e, results)
 
-	print results
+
+	e2 = threading.Event()
+	t2 = threading.Thread(name = "loadE", target=loadEmulator,
+			args=(e2,pName,monkey_script,"none","5556"))
+	t2.start()
+
+        analyseData(e1, results)
+	analyseData(e2, results)
+
+	print results1
+	print results2
 
 #	f = open(emul, 'r')
 
