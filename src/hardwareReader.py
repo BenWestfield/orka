@@ -7,9 +7,10 @@
 #used to read the output of the batterystats.bin once this has been transfered
 #to a txt file. This takes the total energy used and prints this to screen
 
+import os
 
-
-FILE = "orka/orka/working/dump.txt"
+ORKAHOME = os.environ['ORKAHOME']
+FILE = ORKAHOME + "working/dump.txt"
 
 def getHWusage():
     
@@ -27,7 +28,9 @@ def getHWusage():
             line = lines.split()
             if len(line)>1:
                 if write:
-                    if line[0].startswith("Capacity"):
+		    if line[0].startswith("["):
+			break;
+                    elif line[0].startswith("Capacity"):
                         #remove the trailing comma
                         costDict["total battery usage"]=float(line[4][:-1])
                     #hardware usage, therefore should copy into dictionary
@@ -43,11 +46,11 @@ def getHWusage():
                         name = ""
                         while not line[i].endswith(":"):
                             name += line[i] + " "
-                            i+=1
+			    i+=1
                         #add last line
                         name += line[i][:-1]
                         #the next i will contain the energy costs
-                        costDict[name] = float(line[i+1])
+                        costDict[name] = line[i+1]
                 if line[0] == "Estimated":
                     write = True
         source.close()

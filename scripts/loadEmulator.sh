@@ -13,10 +13,10 @@ APP=$1
 PACKAGE=$2
 MONKEY=${3}
 AVD=$4
-ADB=orka/orka/dependencies/android-sdk-linux/platform-tools/adb
+ADB=$ORKAHOME/dependencies/android-sdk/platform-tools/adb
 
 #load the emulator
-orka/orka/dependencies/android-sdk-linux/tools/emulator -avd $AVD -wipe-data &\
+$ORKAHOME/dependencies/android-sdk/tools/emulator -avd $AVD -wipe-data &\
 #-qemu -m 512 -enable-kvm &
 #adding a slight delay to allow the emulator to start 
 sleep 1
@@ -35,18 +35,18 @@ done
 #unlock screen
 $ADB shell input keyevent 82
 #load the app
-while [ ! -f orka/orka/working/dist/orka.apk ];
+while [ ! -f $ORKAHOME/working/dist/orka.apk ];
 do
     sleep 1
 done
-$ADB install orka/orka/working/dist/orka.apk
+$ADB install $ORKAHOME/working/dist/orka.apk
 
 #add slight wait before running telnet
 sleep 4
-orka/orka/scripts/telnet.sh
+$ORKAHOME/scripts/telnet.sh
 
       
 #run monkey script
 echo "running monkeyrunner script"
-orka/orka/dependencies/android-sdk-linux/tools/monkeyrunner "$MONKEY"
+$ORKAHOME/dependencies/android-sdk/tools/monkeyrunner "$MONKEY"
     

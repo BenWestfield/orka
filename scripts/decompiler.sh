@@ -16,6 +16,7 @@
 
 FILENAME=$1
 PACKAGE=$2
+
 echo 'Starting to decompile file'
 echo 'loading apk file'
 #copy apk into a temp directory if it exits, else throw exception
@@ -28,12 +29,12 @@ fi
 echo "decompiling apk file"
 echo
 #decompile with ApkTool, the -f will clear the working directory
-java -jar orka/orka/dependencies/apktool_2.0.1.jar d $FILENAME -o orka/orka/working/ --force
+java -jar $ORKAHOME/dependencies/apktool_2.0.1.jar d $FILENAME -o $ORKAHOME/working/ --force
 
 echo "finished decompiling app"
 
 echo -n "Inserting Logging functions" 
-cp "../dependencies/Logger.smali" "../working/smali/$PACKAGE/Logger.smali"
+cp $ORKAHOME+"/dependencies/Logger.smali" $ORKAHOME+"/working/smali/$PACKAGE/Logger.smali"
 echo "decompiling complete"
 exit
 
