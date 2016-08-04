@@ -263,6 +263,38 @@ def main(argv):
 	#inject logging into app
 	injector(app, packDir)
 
+	lines = [line.rstrip('\n') for line in open(emul)]
+
+	j = 5554
+
+	for i in lines:
+		e = threading.Event()
+		t = threading.Thread(name = "loadE", target=loadEmulator,
+			args=(e, pName, monkey_script, i, str(j)))
+		t.start()
+	        t2 = threading.Thread(name = "results", target=analyseData,
+                        args=(e, str(j)))
+		t2.start()
+		j += 2
+
+	"""
+	threads = []
+	j = 4
+
+	for i in lines:
+		e = threading.Event()
+		t = threading.Thread(name = "loadE", target=loadEmulator,
+			args=(e, pName, monkey_script, i, "555" + str(j)))
+		t.start()
+		threads.append(t)
+
+	for t in threads:
+		t.join()
+
+	print "emulators loaded"
+	"""
+
+	"""
 	e1 = threading.Event()
 
 	t1 = threading.Thread(name = "loadE", target=loadEmulator,
@@ -285,7 +317,7 @@ def main(argv):
 			args=(e2, "5556"))
 
 	t4.start()
-
+	"""
 
 #	f = open(emul, 'r')
 
