@@ -80,12 +80,15 @@ def packageName(app):
 #bwestfield
 #calls the smali/injector functions
 def injector(app, packDir):
+	print "decompiling"
 	runProcess(ORKAHOME + "scripts/decompiler.sh " + app + " " + packDir)
 
-	inject.inject(ORKAHOME + "/working/smali/" + packDir+ "/*")
+	print "injecting"
+	inject.inject(ORKAHOME + "working/smali/" + packDir + "/*")
 
 	#recompile app
-	runProcess("java -jar " + ORKAHOME + "dependencies/apktool_2.0.1.jar b " +
+	print "recompiling"
+	runProcess("java -jar " + ORKAHOME + "dependencies/apktool_2.2.0.jar b " +
 		ORKAHOME + "working/ -o " + ORKAHOME + "working/dist/orka.apk")
 
 	#sign the app as debug
@@ -149,7 +152,10 @@ def analyseData(e,port):
 
         results.append(hardwareReader.getHWusage())
 
+	print port
 	print results
+
+	#getRelativeUses(results[1])
 
         #last thing to do is close the emulator
         runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb -s emulator-" + port + " emu kill")
@@ -211,6 +217,7 @@ def analyseAPI():
                                                 #if not in dictionary, add method
                                                 routine = results.Routine(method,1)
                                                 meth[routine.getName()] = routine
+						print meth[routine.getName()]
                                         else:
                                                 meth[method].addCall()
                                 elif line[LINE_DIRECT] =='making':
@@ -243,7 +250,26 @@ def analyseAPI():
                 serial_meth.append(value.to_JSON())
         return serial_meth
 
-
+#Outputting the resutls
+#function to relate the total application usage to
+#more meaningful item such as watching HD video or
+#web browsing
+def getRelativeUses(hardwareUse):
+    totalUse = hardwareUse['total battery usage']
+    #percentage of the battery drained (capacity listed as 1000 in
+  #Dumpsys)
+    drainPercent = totalUse /1000
+    results =[]
+    results.append(totalUse)
+    #web browsing (9 hrs or 32400 seconds)
+    print "Relative uses of energy on the NEXUS 7"
+    print "the energy used by this programme could have instead run"
+    print "the below activity for the shown time (in seconds)"
+    print "Web browsing: %f" % round(drainPercent * 32400,4)
+    #HD Video (10 hours or 36000 seconds)
+    print "HD Video: %f"% round(drainPercent * 36000,4)
+    #3D gaming (4 hours or 14400 seconds)
+    print "3D gaming: %f" % round(drainPercent * 14400,4)
 
 def main(argv):
 
@@ -254,11 +280,14 @@ def main(argv):
 
 	#get package name and directory
 	pName = packageName(app)    
+
 	packDir = ''
 	packName = pName.split('.')
 	for x in range(0,len(packName)):
 		packDir += packName[x] + '/'
 	packDir = packDir[:-1]
+
+	print packDir
 
 	#inject logging into app
 	injector(app, packDir)

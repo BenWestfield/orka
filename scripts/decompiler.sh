@@ -29,12 +29,12 @@ fi
 echo "decompiling apk file"
 echo
 #decompile with ApkTool, the -f will clear the working directory
-java -jar $ORKAHOME/dependencies/apktool_2.0.1.jar d $FILENAME -o $ORKAHOME/working/ --force
+java -jar $ORKAHOME/dependencies/apktool_2.2.0.jar d $FILENAME -o $ORKAHOME/working/ --force
 
 echo "finished decompiling app"
 
 echo -n "Inserting Logging functions" 
-cp $ORKAHOME+"/dependencies/Logger.smali" $ORKAHOME+"/working/smali/$PACKAGE/Logger.smali"
+cp $ORKAHOME/dependencies/Logger.smali $ORKAHOME/working/smali/$PACKAGE/Logger.smali
 echo "decompiling complete"
 exit
 

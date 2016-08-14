@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #
 #Injection code
 #
@@ -16,7 +18,7 @@
 #directory of smali code
 
 import  os,  glob, fnmatch
-
+import sys
 
 #adds the code to print out the name of a new method
 def addLogMethod(output):
@@ -173,6 +175,9 @@ def getTotalParams(parameters):
 
 #main injetor functions
 def injector(f):
+
+    print "injecting %s" %(f)
+
    #recurse if it is a directory 
     if os.path.isdir(f):
         files = glob.glob(f)
@@ -209,7 +214,6 @@ def injector(f):
             depth = 0
             gotoApiCalls = []
 
-            print "opening " + fileName
             while True:
                 lines = source.readline()
                 #skip blank lines
@@ -257,6 +261,7 @@ def injector(f):
                                 parameterMap ={}
                                 param={}
                             break
+
                         #used to skip constructors and methods without apis
                         if ignoreMethod:
                             break
@@ -276,6 +281,7 @@ def injector(f):
                                 gotoApiCalls.append(lists)
                             depth +=1
                             break
+
                         if line[i]. startswith('goto') \
                             and line[i+1].startswith(':goto'):
                             #a loop commands has been found, log all apis for
@@ -293,6 +299,7 @@ def injector(f):
                                     gotoApiCalls = []
                                 depth -= 1
                             break
+
                         if line[i].startswith('.locals'):
                             #increment the locals variable 
                             addedReg = int(line[i+1])
@@ -319,6 +326,7 @@ def injector(f):
                             line.append('\n') # for some reason the ending
                                               #new line is cut off
                             break
+
                         elif line[i] == '.prologue\n':
                             #log entering a new method after the prologue line
                             addLogMethod(output)
@@ -339,6 +347,7 @@ def injector(f):
                                         output.write('     move/from16 '\
                                             + mapping +', ' + reg +'\n\n')
                             break
+
                         elif line[i].startswith('invoke-'):
                             #find if API is being invoked
                             for j in range(i+1,len(line)):
@@ -357,13 +366,12 @@ def injector(f):
                             #call the new method yet. It is better to store these
                             #then wait until the next line/method
                             break
+
                 addLine(line,output)
-               
+
         output.close()
         source.close()
         #overwrite the original file
-        os.rename(fileName+'1',fileName[:len(output.name)-1])
-    
 
 
 def inject(fileDir):
@@ -378,3 +386,9 @@ def inject(fileDir):
     for f in files:
         injector(f)
 
+def main(argv):
+    inject(sys.argv[1])
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

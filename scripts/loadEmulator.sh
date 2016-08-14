@@ -40,7 +40,7 @@ while [ ! -f $ORKAHOME/working/dist/orka.apk ];
 do
     sleep 1
 done
-$ADB -s emulator-$PORT install $ORKAHOME/working/dist/orka.apk
+#$ADB -s emulator-$PORT install $ORKAHOME/working/dist/orka.apk
 
 echo "here"
 
@@ -51,5 +51,5 @@ $ORKAHOME/scripts/telnet.sh $PORT
       
 #run monkey script
 echo "running monkeyrunner script"
-$ORKAHOME/dependencies/android-sdk/tools/monkeyrunner "$MONKEY"
+$ORKAHOME/dependencies/android-sdk/tools/monkeyrunner "$MONKEY" $PACKAGE $PORT $APP
     
