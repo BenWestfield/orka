@@ -22,6 +22,7 @@ import sys
 
 #adds the code to print out the name of a new method
 def addLogMethod(output):
+    print "addLogMethod", output
     output.write('    invoke-static {}, Lcom/test/bbutton/Logger;->methodLog()I\n\n')
 
 #function to return list of parameters and their types
@@ -209,6 +210,8 @@ def injector(f):
                 source.close()
                 return 
 
+	    print "file ", fileName
+	    print "source ", source
             output = open(fileName+'1','w')
             #used in gotofix
             depth = 0
@@ -328,9 +331,12 @@ def injector(f):
                             break
 
                         elif line[i] == '.prologue\n':
+                            print "prologue", line[i]
                             #log entering a new method after the prologue line
                             addLogMethod(output)
-                            #move parameters 
+
+                            #move parameters
+                            print remappedParam
                             if remappedParam:
                                 for key,item in sorted(param.iteritems()):
                                     reg = 'p'+str(key)
@@ -361,8 +367,8 @@ def injector(f):
                                         #depth
                                         gotoApiCalls[depth-1].append(getAPI(line[j]))
                                     else:
-                                        apiCalls.append(  getAPI(line[j]))
-                           #we do not want to print as it is not safe to 
+                                        apiCalls.append(getAPI(line[j]))
+                           #we do not want to print as it is not safe to
                             #call the new method yet. It is better to store these
                             #then wait until the next line/method
                             break
@@ -372,11 +378,11 @@ def injector(f):
         output.close()
         source.close()
         #overwrite the original file
+        os.rename(fileName+'1',fileName[:len(output.name)-1])
 
 
 def inject(fileDir):
 
-    print fileDir
     #glob finds pathname specified by the unix shell style
     files = glob.glob(fileDir)
     if not files:

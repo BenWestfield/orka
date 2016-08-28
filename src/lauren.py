@@ -10,6 +10,7 @@ import threading
 import hardwareReader
 import csv
 import re
+import results
 
 ORKAHOME = os.environ['ORKAHOME']
 
@@ -129,7 +130,7 @@ def loadEmulator(e,pName,monkey,emul,port):
 #bwestfield
 def analyseData(e,port):
 
-	results = []	
+	result = []	
 
         print "entering analyse data"
 
@@ -139,7 +140,7 @@ def analyseData(e,port):
                 e.wait()
 
         #get API data
-        results.append(analyseAPI())
+        result.append(analyseAPI())
 
         print "Total API energy usage"
 
@@ -150,15 +151,19 @@ def analyseData(e,port):
         while not os.path.exists(ORKAHOME + "working/dump.txt"):
                 sleep(1)
 
-        results.append(hardwareReader.getHWusage())
+        result.append(hardwareReader.getHWusage())
 
 	print port
-	print results
-
-	#getRelativeUses(results[1])
+	print result
+	print "MAIN: methods is " + str(len(result[0]))
+    	print "MAIN: hardware is " + str(len(result[1]))
+	
+	#getRelativeUses(result[1])
 
         #last thing to do is close the emulator
         runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb -s emulator-" + port + " emu kill")
+
+	
 
 #bwestfield
 #function that returns a dictionary containing the api costs
@@ -185,10 +190,10 @@ def sanitise(api):
 def analyseAPI():
 	print "enter API"
 
-        METHOD_NAME = 3
+        METHOD_NAME = 9
         #index of the string that will be used when decideding on how to log
-        LINE_DIRECT = 2
-        API_LOCATION =5
+        LINE_DIRECT = 8
+        API_LOCATION =11
 
         #download logcat and save to file
         time.sleep(2)
@@ -202,14 +207,18 @@ def analyseAPI():
         #dictionary of methods. Each method stores a counter, this stores the
         #number of instance of each api call
         meth={}
+	print "meth ", meth
 
         #store the current method we are in
         method =''
         with open(ORKAHOME + "working/output.txt",'r') as log:
                 for lines in log:
                         line = lines.split(' ')
+			print line
                         #then one of the inserted logs
-                        if line[0].startswith("I/bwestfield"):
+                        if len(line) > 7 and line[7].startswith("bwestfield"):
+				print line[7]
+				print line[LINE_DIRECT]
                                 #if method call
                                 if line[LINE_DIRECT] =='entering':
                                         method = sanitise(line[METHOD_NAME])
@@ -221,6 +230,7 @@ def analyseAPI():
                                         else:
                                                 meth[method].addCall()
                                 elif line[LINE_DIRECT] =='making':
+					print line[API_LOCATION]
                                         api = sanitise(line[API_LOCATION])
                                         if method != '':
                                                 meth[method].addApi(api)
@@ -305,6 +315,9 @@ def main(argv):
                         args=(e, str(j)))
 		t2.start()
 		j += 2
+
+
+
 
 	"""
 	threads = []

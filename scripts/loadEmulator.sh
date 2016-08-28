@@ -40,7 +40,7 @@ while [ ! -f $ORKAHOME/working/dist/orka.apk ];
 do
     sleep 1
 done
-#$ADB -s emulator-$PORT install $ORKAHOME/working/dist/orka.apk
+$ADB -s emulator-$PORT install $ORKAHOME/working/dist/orka.apk
 
 echo "here"
 
