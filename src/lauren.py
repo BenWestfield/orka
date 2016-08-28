@@ -13,6 +13,7 @@ import re
 import results
 
 ORKAHOME = os.environ['ORKAHOME']
+ORKASDK = os.environ['ORKASDK']
 
 #bwestfield and lc3311
 #function to return app, monkey script and emulators from command-line args
@@ -59,13 +60,13 @@ def packageName(app):
 		error = "cannot find specified app - {}".format(app)
 		raise OSError(error)
 
-	if not os.path.exists(ORKAHOME + "dependencies/android-sdk/build-tools/22.0.1/aapt"):
+	if not os.path.exists(ORKASDK + "build-tools/22.0.1/aapt"):
 		raise OSError("missing dependecies. Android 22.0.1 required in \
-			$ORKAHOME/dependencies/android-sdk/")
+			$ORKASDK")
     
 	#NB bwestfield: This could pass -o to grep to only get the match, but I
 	#haven't been able to write a regex that matches only the package name
-	command = ORKAHOME + "dependencies/android-sdk/build-tools/22.0.1/aapt \
+	command = ORKASDK + "build-tools/22.0.1/aapt \
 		dump badging {} | grep package:\ name ".format(app)
 	word = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
@@ -145,7 +146,7 @@ def analyseData(e,port):
         print "Total API energy usage"
 
         #dump battery stats into dump.txt
-        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb -s emulator-" + port + " shell "
+        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port + " shell "
                 + "dumpsys batterystats > " + ORKAHOME + "working/dump.txt")
 
         while not os.path.exists(ORKAHOME + "working/dump.txt"):
@@ -161,7 +162,7 @@ def analyseData(e,port):
 	#getRelativeUses(result[1])
 
         #last thing to do is close the emulator
-        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb -s emulator-" + port + " emu kill")
+        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port + " emu kill")
 
 	
 
@@ -198,7 +199,7 @@ def analyseAPI():
         #download logcat and save to file
         time.sleep(2)
 
-        runProcess(ORKAHOME + "dependencies/android-sdk/platform-tools/adb "
+        runProcess(ORKASDK + "platform-tools/adb "
                 + "logcat bwestfield:I *:S > " + ORKAHOME + "working/output.txt &")
 
         #two second delay to make sure the output has saved

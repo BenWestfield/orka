@@ -31,6 +31,6 @@ fi
 
 echo -n "recompiling app...."
 #recompiles the app and renames it orka.pak
-java -jar ../dependencies/apktool_2.0.1.jar b ../working/ -o test.apk 
+java -jar $ORKAHOME/dependencies/apktool_2.0.1.jar b ../working/ -o test.apk 
 
 echo "complete"

@@ -14,10 +14,10 @@ PACKAGE=$2
 MONKEY=${3}
 AVD=$4
 PORT=$5
-ADB=$ORKAHOME/dependencies/android-sdk/platform-tools/adb
+ADB=$ORKASDK/platform-tools/adb
 
 #load the emulator
-$ORKAHOME/dependencies/android-sdk/tools/emulator -port $PORT -avd $AVD -wipe-data &\
+$ORKASDK/tools/emulator -port $PORT -avd $AVD -wipe-data &\
 #-qemu -m 512 -enable-kvm &
 #adding a slight delay to allow the emulator to start 
 sleep 1
@@ -51,5 +51,5 @@ $ORKAHOME/scripts/telnet.sh $PORT
       
 #run monkey script
 echo "running monkeyrunner script"
-$ORKAHOME/dependencies/android-sdk/tools/monkeyrunner "$MONKEY" $PACKAGE $PORT $APP
+$ORKASDK/tools/monkeyrunner "$MONKEY" $PACKAGE $PORT $APP
     
