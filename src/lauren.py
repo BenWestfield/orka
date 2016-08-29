@@ -16,8 +16,9 @@ ORKAHOME = os.environ['ORKAHOME']
 ORKASDK = os.environ['ORKASDK']
 
 #bwestfield and lc3311
-#function to return app, monkey script and emulators from command-line args
+#function to return app, monkey script and emulators file from command-line args
 def get_app_script_emul(argv):
+
 	app =''
 	monkey_script =''
 	emul = ''
@@ -48,6 +49,7 @@ def get_app_script_emul(argv):
 #bwestfield
 #function to get the package name from the app
 def packageName(app):
+
 	if not isinstance(app,str):
 		#NB bwestfield, if this is ever changed back to a web app, this needs
 		#to check the type is unicode
@@ -82,14 +84,14 @@ def packageName(app):
 #bwestfield
 #calls the smali/injector functions
 def injector(app, packDir):
-	print "decompiling"
+
+	#decompile the app
 	runProcess(ORKAHOME + "scripts/decompiler.sh " + app + " " + packDir)
 
-	print "injecting"
+	#inject the app
 	inject.inject(ORKAHOME + "working/smali/" + packDir + "/*")
 
-	#recompile app
-	print "recompiling"
+	#recompile the app
 	runProcess("java -jar " + ORKAHOME + "dependencies/apktool_2.2.0.jar b " +
 		ORKAHOME + "working/ -o " + ORKAHOME + "working/dist/orka.apk")
 
@@ -116,43 +118,36 @@ def runProcess(cmd):
 		raise RuntimeError(error)
 
 #function to load the emulator and install the app
-def loadEmulator(e,pName,monkey,emul,port):
-    print "loading emulator"
-    #set the event flag so that later part know the emulator is loaded
-    cmd = ORKAHOME + "scripts/loadEmulator.sh " + ORKAHOME + "working/dist/orka.apk "
-    print "starting the emulator"
-    cmd += pName + " " + monkey + " " + emul + " " + port
-    runProcess(cmd)
-    print "emulator finished"
+def loadEmulator(pName,monkey,emul,port):
 
-    print "event set"
-    e.set()
+    #set the event flag so that later part know the emulator is loaded
+    cmd = ORKAHOME + "scripts/loadEmulator.sh " + ORKAHOME + "working/dist/orka.apk " \
+		+ pName + " " + monkey + " " + emul + " " + port
+
+    runProcess(cmd)
+
+    analyseData(port)
 
 #bwestfield
-def analyseData(e,port):
+def analyseData(port):
 
 	result = []	
 
         print "entering analyse data"
 
-        #do no start analysing until the emulator is loaded and the test has been
-        #run
-        while not e.isSet():
-                e.wait()
-
         #get API data
-        result.append(analyseAPI())
+        result.append(analyseAPI(port))
 
         print "Total API energy usage"
 
         #dump battery stats into dump.txt
-        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port + " shell "
-                + "dumpsys batterystats > " + ORKAHOME + "working/dump.txt")
+        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port
+                + " shell dumpsys batterystats > " + ORKAHOME + "working/dump_" + port + ".txt")
 
-        while not os.path.exists(ORKAHOME + "working/dump.txt"):
-                sleep(1)
+        while not os.path.exists(ORKAHOME + "working/dump_" + port + ".txt"):
+                sleep(10)
 
-        result.append(hardwareReader.getHWusage())
+        result.append(hardwareReader.getHWusage(port))
 
 	print port
 	print result
@@ -188,7 +183,7 @@ def sanitise(api):
 #bwestfield
 #function that draws the APIs from logcat then compares to the list
 #of API costs. Returns a dictionary of Routine object
-def analyseAPI():
+def analyseAPI(port):
 	print "enter API"
 
         METHOD_NAME = 3
@@ -199,11 +194,11 @@ def analyseAPI():
         #download logcat and save to file
         time.sleep(2)
 
-        runProcess(ORKASDK + "platform-tools/adb "
-                + "logcat -v brief bwestfield:I *:S > " + ORKAHOME + "working/output.txt &")
+        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port +
+                " logcat -v brief bwestfield:I *:S > " + ORKAHOME + "working/output_" + port + ".txt &")
 
         #two second delay to make sure the output has saved
-        time.sleep(2)
+        time.sleep(200)
 
         #dictionary of methods. Each method stores a counter, this stores the
         #number of instance of each api call
@@ -212,7 +207,9 @@ def analyseAPI():
 
         #store the current method we are in
         method =''
-        with open(ORKAHOME + "working/output.txt",'r') as log:
+	print "opening file"
+        with open(ORKAHOME + "working/output_" + port + ".txt",'r') as log:
+		print "file opened"
                 for lines in log:
                         line = lines.split(' ')
 			print line
@@ -282,21 +279,18 @@ def getRelativeUses(hardwareUse):
 
 def main(argv):
 
+	
 	app, monkey_script, emul = get_app_script_emul(argv)
-
-	print "Running Orka"
-
 
 	#get package name and directory
 	pName = packageName(app)    
-
 	packDir = ''
 	packName = pName.split('.')
+
 	for x in range(0,len(packName)):
 		packDir += packName[x] + '/'
-	packDir = packDir[:-1]
 
-	print packDir
+	packDir = packDir[:-1]
 
 	#inject logging into app
 	injector(app, packDir)
@@ -305,6 +299,11 @@ def main(argv):
 
 	j = 5554
 
+	for i in lines:
+		loadEmulator(pName, monkey_script, i, str(j))
+
+
+"""
 	for i in lines:
 		e = threading.Event()
 		t = threading.Thread(name = "loadE", target=loadEmulator,
@@ -315,81 +314,10 @@ def main(argv):
 		t2.start()
 		j += 2
 
+"""
 
 
-
-	"""
-	threads = []
-	j = 4
-
-	for i in lines:
-		e = threading.Event()
-		t = threading.Thread(name = "loadE", target=loadEmulator,
-			args=(e, pName, monkey_script, i, "555" + str(j)))
-		t.start()
-		threads.append(t)
-
-	for t in threads:
-		t.join()
-
-	print "emulators loaded"
-	"""
-
-	"""
-	e1 = threading.Event()
-
-	t1 = threading.Thread(name = "loadE", target=loadEmulator,
-			args=(e1,pName,monkey_script,"n7","5554"))
-
-	t1.start()
-
-
-
-	e2 = threading.Event()
-	t2 = threading.Thread(name = "loadE", target=loadEmulator,
-			args=(e2,pName,monkey_script,"none","5556"))
-	t2.start()
-
-	t3 = threading.Thread(name = "res1", target=analyseData,
-			args=(e1, "5554"))
-	t3.start()
-
-	t4 = threading.Thread(name = "res2", target=analyseData,
-			args=(e2, "5556"))
-
-	t4.start()
-	"""
-
-#	f = open(emul, 'r')
-
-#	lines = f.readline()
-#	lines = lines.split(' ')
-
-#	j = 5
-#	for i in lines:
-#		runProcess("xterm -hold -e ssh matrix0" + str(j) + " -X \'~/orka/orka/src/lauren2.py " + app + " " + monkey_script + " " + str(j) + " " + i + "\' &")
-#		j += 3
-
-#	runProcess('./lauren2.py ' + pName + ' ' + monkey_script + ' n7')
-
-#    runProcess("xterm -hold -e " + cmd + " n7 &")
-#    time.sleep(20)
-#    runProcess("xterm -hold -e " + cmd + " 12-07-nexus6 &")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-#function to run a single process in a shell for its entirety
-def runProcess(cmd):
-    print "Running process " + cmd
-    if not (isinstance(cmd,unicode) or isinstance(cmd,str)):
-        raise AttributeError('invalid command supplied as parameter')
-    p =subprocess.Popen(cmd,shell=True)
-    p.wait()
-
-    if p.returncode != 0:
-        print "process wont run!!"
-        error = "invalid command attempted to be executed in\
-            runProcess - {}".format(cmd)
-        raise RuntimeError(error)
 

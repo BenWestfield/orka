@@ -12,10 +12,10 @@ import os
 ORKAHOME = os.environ['ORKAHOME']
 FILE = ORKAHOME + "working/dump.txt"
 
-def getHWusage():
+def getHWusage(port):
     
     costDict={} 
-    with open(FILE,'r') as source:  
+    with open(ORKAHOME + "working/dump_" + port + ".txt",'r') as source:  
         #bool used to store if the routine shoul dbe writting to a dictionary
         write=False
         for lines in source:
