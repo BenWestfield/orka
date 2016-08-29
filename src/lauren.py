@@ -191,16 +191,16 @@ def sanitise(api):
 def analyseAPI():
 	print "enter API"
 
-        METHOD_NAME = 9
+        METHOD_NAME = 3
         #index of the string that will be used when decideding on how to log
-        LINE_DIRECT = 8
-        API_LOCATION =11
+        LINE_DIRECT = 2
+        API_LOCATION =5
 
         #download logcat and save to file
         time.sleep(2)
 
         runProcess(ORKASDK + "platform-tools/adb "
-                + "logcat bwestfield:I *:S > " + ORKAHOME + "working/output.txt &")
+                + "logcat -v brief bwestfield:I *:S > " + ORKAHOME + "working/output.txt &")
 
         #two second delay to make sure the output has saved
         time.sleep(2)
@@ -217,9 +217,7 @@ def analyseAPI():
                         line = lines.split(' ')
 			print line
                         #then one of the inserted logs
-                        if len(line) > 7 and line[7].startswith("bwestfield"):
-				print line[7]
-				print line[LINE_DIRECT]
+                        if line[0].startswith("I/bwestfield"):
                                 #if method call
                                 if line[LINE_DIRECT] =='entering':
                                         method = sanitise(line[METHOD_NAME])
