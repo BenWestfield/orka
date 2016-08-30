@@ -118,38 +118,37 @@ def runProcess(cmd):
 		raise RuntimeError(error)
 
 #function to load the emulator and install the app
-def loadEmulator(pName,monkey,emul,port):
+def loadEmulator(pName,monkey,emul,avd):
 
     #set the event flag so that later part know the emulator is loaded
     cmd = ORKAHOME + "scripts/loadEmulator.sh " + ORKAHOME + "working/dist/orka.apk " \
-		+ pName + " " + monkey + " " + emul + " " + port
+		+ pName + " " + monkey + " " + emul
 
     runProcess(cmd)
 
-    analyseData(port)
+    analyseData(avd)
 
 #bwestfield
-def analyseData(port):
+def analyseData(avd):
 
 	result = []	
 
         print "entering analyse data"
 
         #get API data
-        result.append(analyseAPI(port))
+        result.append(analyseAPI(avd))
 
         print "Total API energy usage"
 
         #dump battery stats into dump.txt
-        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port
-                + " shell dumpsys batterystats > " + ORKAHOME + "working/dump_" + port + ".txt")
+        runProcess(ORKASDK + "platform-tools/adb \
+		 shell dumpsys batterystats > " + ORKAHOME + "working/dump_" + avd + ".txt")
 
-        while not os.path.exists(ORKAHOME + "working/dump_" + port + ".txt"):
+        while not os.path.exists(ORKAHOME + "working/dump_" + avd + ".txt"):
                 sleep(10)
 
-        result.append(hardwareReader.getHWusage(port))
+        result.append(hardwareReader.getHWusage(avd))
 
-	print port
 	print result
 	print "MAIN: methods is " + str(len(result[0]))
     	print "MAIN: hardware is " + str(len(result[1]))
@@ -157,7 +156,7 @@ def analyseData(port):
 	#getRelativeUses(result[1])
 
         #last thing to do is close the emulator
-        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port + " emu kill")
+        runProcess(ORKASDK + "platform-tools/adb emu kill")
 
 	
 
@@ -183,7 +182,7 @@ def sanitise(api):
 #bwestfield
 #function that draws the APIs from logcat then compares to the list
 #of API costs. Returns a dictionary of Routine object
-def analyseAPI(port):
+def analyseAPI(avd):
 	print "enter API"
 
         METHOD_NAME = 3
@@ -194,22 +193,19 @@ def analyseAPI(port):
         #download logcat and save to file
         time.sleep(2)
 
-        runProcess(ORKASDK + "platform-tools/adb -s emulator-" + port +
-                " logcat -v brief bwestfield:I *:S > " + ORKAHOME + "working/output_" + port + ".txt &")
+        runProcess(ORKASDK + "platform-tools/adb logcat -v brief \
+		bwestfield:I *:S > " + ORKAHOME + "working/output_" + avd + ".txt &")
 
         #two second delay to make sure the output has saved
-        time.sleep(200)
+        time.sleep(50)
 
         #dictionary of methods. Each method stores a counter, this stores the
         #number of instance of each api call
         meth={}
-	print "meth ", meth
 
         #store the current method we are in
         method =''
-	print "opening file"
-        with open(ORKAHOME + "working/output_" + port + ".txt",'r') as log:
-		print "file opened"
+        with open(ORKAHOME + "working/output_" + avd + ".txt",'r') as log:
                 for lines in log:
                         line = lines.split(' ')
 			print line
@@ -297,25 +293,12 @@ def main(argv):
 
 	lines = [line.rstrip('\n') for line in open(emul)]
 
-	j = 5554
+	
+	em_num = 1
 
 	for i in lines:
-		loadEmulator(pName, monkey_script, i, str(j))
-
-
-"""
-	for i in lines:
-		e = threading.Event()
-		t = threading.Thread(name = "loadE", target=loadEmulator,
-			args=(e, pName, monkey_script, i, str(j)))
-		t.start()
-	        t2 = threading.Thread(name = "results", target=analyseData,
-                        args=(e, str(j)))
-		t2.start()
-		j += 2
-
-"""
-
+		loadEmulator(pName, monkey_script, i, str(em_num))
+		em_num += 1
 
 
 if __name__ == "__main__":

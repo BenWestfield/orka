@@ -1,21 +1,14 @@
-##
-##############################
-## hardware reader
-##
-##############################
-
-#used to read the output of the batterystats.bin once this has been transfered
-#to a txt file. This takes the total energy used and prints this to screen
+#!/usr/bin/python
 
 import os
 
-ORKAHOME = os.environ['ORKAHOME']
-FILE = ORKAHOME + "working/dump.txt"
 
-def getHWusage(port):
+ORKAHOME = os.environ['ORKAHOME']
+
+def getHWusage(avd):
     
     costDict={} 
-    with open(ORKAHOME + "working/dump_" + port + ".txt",'r') as source:  
+    with open(ORKAHOME + "working/dump_" + str(avd) + ".txt",'r') as source:  
         #bool used to store if the routine shoul dbe writting to a dictionary
         write=False
         for lines in source:
@@ -26,6 +19,7 @@ def getHWusage(port):
                 break
             #split each line and look for the estimated usage
             line = lines.split()
+
             if len(line)>1:
                 if write:
 		    if line[0].startswith("["):
@@ -52,8 +46,11 @@ def getHWusage(port):
                         #the next i will contain the energy costs
 			if i == (len(line) - 1):
 			    break
-                        costDict[name] = line[i+1]
-                if line[0] == "Estimated":
+                        costDict[name] = line[i+1:]
+                if len(line) > 3 and line[3] == "charge:":
+		    print line
                     write = True
         source.close()
+
     return costDict
+
