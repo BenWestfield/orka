@@ -24,10 +24,8 @@ sleep 1
 $ADB wait-for-device
 while true;do
      LOADED=$($ADB shell getprop sys.boot_completed | tr -d '\r')
-#     'echo $LOADED
      if [ "$LOADED" = "1" ];
         then
-            echo "emulator loaded"
             break
     fi
 done
@@ -47,5 +45,4 @@ sleep 4
 $ORKAHOME/scripts/telnet.sh
       
 #run monkey script
-echo "running monkeyrunner script"
 $ORKASDK/tools/monkeyrunner "$MONKEY" $PACKAGE $APP

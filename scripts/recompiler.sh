@@ -29,8 +29,5 @@ if ls "$PATH/*.smali1" 1> /dev/null 2>&1;
 fi
 
 
-echo -n "recompiling app...."
 #recompiles the app and renames it orka.pak
 java -jar $ORKAHOME/dependencies/apktool_2.0.1.jar b ../working/ -o test.apk 
-
-echo "complete"

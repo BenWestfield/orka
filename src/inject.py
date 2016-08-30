@@ -22,7 +22,6 @@ import sys
 
 #adds the code to print out the name of a new method
 def addLogMethod(output):
-    print "addLogMethod", output
     output.write('    invoke-static {}, Lcom/test/bbutton/Logger;->methodLog()I\n\n')
 
 #function to return list of parameters and their types
@@ -177,18 +176,13 @@ def getTotalParams(parameters):
 #main injetor functions
 def injector(f):
 
-    print "injecting %s" %(f)
-
    #recurse if it is a directory 
     if os.path.isdir(f):
         files = glob.glob(f)
         if not files:
             print "directory error"
-        else:
-            print "files is good"
         for root, dirnames, filenames in os.walk(f):
             for x in range(0,len(filenames)):
-                print "running for new file"
                 injector(os.path.join(f,filenames[x]))
 
             for x in range(0,len(dirnames)):
@@ -210,8 +204,6 @@ def injector(f):
                 source.close()
                 return 
 
-	    print "file ", fileName
-	    print "source ", source
             output = open(fileName+'1','w')
             #used in gotofix
             depth = 0
@@ -240,7 +232,6 @@ def injector(f):
                                 ignoreMethod = True 
                                 break
                             elif not hasApis(source):
-                                print "no API calls, ignoring"
                                 ignoreMethod = True
                                 break
 
@@ -277,10 +268,8 @@ def injector(f):
                             #that depth
                             lists= []
                             try:
-                                print "index exists"
                                 gotoApiCalls[depth] = []
                             except:
-                                print "adding new index"
                                 gotoApiCalls.append(lists)
                             depth +=1
                             break
@@ -331,12 +320,10 @@ def injector(f):
                             break
 
                         elif line[i] == '.prologue\n':
-                            print "prologue", line[i]
                             #log entering a new method after the prologue line
                             addLogMethod(output)
 
                             #move parameters
-                            print remappedParam
                             if remappedParam:
                                 for key,item in sorted(param.iteritems()):
                                     reg = 'p'+str(key)

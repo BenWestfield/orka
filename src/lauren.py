@@ -78,7 +78,6 @@ def packageName(app):
 	for x in range(0,len(package)):
 		if package[x].startswith("name"):
 			name = package[x].split('\'')
-			print "Found package name {}".format(name[1])
 			return name[1]
 
 #bwestfield
@@ -133,12 +132,8 @@ def analyseData(avd):
 
 	result = []	
 
-        print "entering analyse data"
-
         #get API data
         result.append(analyseAPI(avd))
-
-        print "Total API energy usage"
 
         #dump battery stats into dump.txt
         runProcess(ORKASDK + "platform-tools/adb \
@@ -183,7 +178,6 @@ def sanitise(api):
 #function that draws the APIs from logcat then compares to the list
 #of API costs. Returns a dictionary of Routine object
 def analyseAPI(avd):
-	print "enter API"
 
         METHOD_NAME = 3
         #index of the string that will be used when decideding on how to log
@@ -208,7 +202,6 @@ def analyseAPI(avd):
         with open(ORKAHOME + "working/output_" + avd + ".txt",'r') as log:
                 for lines in log:
                         line = lines.split(' ')
-			print line
                         #then one of the inserted logs
                         if line[0].startswith("I/bwestfield"):
                                 #if method call
@@ -218,11 +211,9 @@ def analyseAPI(avd):
                                                 #if not in dictionary, add method
                                                 routine = results.Routine(method,1)
                                                 meth[routine.getName()] = routine
-						print meth[routine.getName()]
                                         else:
                                                 meth[method].addCall()
                                 elif line[LINE_DIRECT] =='making':
-					print line[API_LOCATION]
                                         api = sanitise(line[API_LOCATION])
                                         if method != '':
                                                 meth[method].addApi(api)
