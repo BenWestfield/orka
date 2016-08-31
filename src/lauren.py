@@ -191,7 +191,7 @@ def analyseAPI(avd):
 		bwestfield:I *:S > " + ORKAHOME + "working/output_" + avd + ".txt &")
 
         #two second delay to make sure the output has saved
-        time.sleep(50)
+        time.sleep(10)
 
         #dictionary of methods. Each method stores a counter, this stores the
         #number of instance of each api call
